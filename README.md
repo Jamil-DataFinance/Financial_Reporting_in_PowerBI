@@ -26,13 +26,18 @@ I can split this process into 4 Major Steps and Few Challenges
 Our database had a well-structured schema with fact and dimension tables. I created a consolidated view by writing a SQL query to combine these tables into a single table. This approach ensures real-time data updates and prevents data loss during refreshes. The view was then connected to Power BI, and I incorporated the GETDATE() function to track query refresh dates.
 
 
+**2. Data CLeaning and Tranformation**
+
+In Power Query Editor, I did not need to clean the data since it was already processed in SQL. My task was to split the consolidated table into separate Fact and Dimension tables. I handled duplication issues that arose from SQL inner joins by using the "Remove Duplicates" option for all tables except the Fact table.
+
+**3. Data Model**
 
 
+The data model follows a snowflake schema, which is illustrated in the attached picture. This schema involves a central Fact table surrounded by normalized Dimension tables, enhancing data organization and reducing redundancy. 
 
+**4. Reporting**
 
-
-
-
+In the reporting stage, I adopted a step-wise approach, keeping measures organized by their respective reports. This method ensures clarity and maintains a clear structure, with each measure directly related to the specific report it supports.
 
 
 
