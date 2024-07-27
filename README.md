@@ -3,10 +3,6 @@
 # Overview
 This project showcases a comprehensive financial reporting dashboard built in Power BI, using data sourced from an SQL database. The dashboard provides real-time insights into financial performance, featuring detailed income statements, balance sheets, and cash flow statements.
 
-# Check out the project below. 
-
-https://app.powerbi.com/links/nidqvkjOOu?ctid=00333eed-6c17-42d5-9b84-c61a712c1071&pbi_source=linkShare&bookmarkGuid=8211a2b8-617a-4546-82da-e7122020a96b
-
 # Features
 
 **Real-Time Data Integration:** Connects to an SQL database for up-to-date financial data.
