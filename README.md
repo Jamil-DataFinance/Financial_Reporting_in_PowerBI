@@ -27,45 +27,7 @@ Our database had a well-structured schema with fact and dimension tables. I crea
 
 **Below is the SQL query used to gather the data**
 
-SELECT
-
---FactGLTran
-gl.FactGLTranID,
-gl.GLTranAmount,
-gl.JournalID,
-gl.GLTranDescription,
-gl.GLTranDate,
-
---GL Accounts
-acc.AlternateKey 'GLAcctNum',
-acc.GLAcctName,
-acc.Statement,
-acc.Category,
-acc.Subcategory,
-
---Stores
-sto.AlternateKey 'StoreNum',
-sto.StoreName,
-sto.ManagerID,
-sto.PreviousManagerID,
-sto.ContactTel,
-sto.AddressLine1,
-sto.AddressLine2,
-sto.ZipCode,
-
---Region
-reg.AlternateKey 'RegionNum',
-reg.RegionName,
-reg.SalesRegionName,
-
---Last Refresh Date
-CONVERT(datetime2, GETDATE() at time zone 'UTC' at time zone 'Central Standard Time') AS 'LastRefreshDate'
-
-FROM FactGLTran AS gl
-    INNER JOIN dimGLAcct AS acc ON gl.GLAcctID = acc.GLAcctID
-    INNER JOIN dimStore AS sto ON gl.StoreID = sto.StoreID
-    INNER JOIN dimRegion AS reg ON sto.RegionID = reg.RegionID
-
+![image](https://github.com/user-attachments/assets/b6fd57d5-e0a7-4236-be41-8d6753510d8a)
 
 **Above query has been uploaded to power BI using connection with Microsoft server**
 
@@ -88,65 +50,50 @@ In the reporting stage, I adopted a step-wise approach, keeping measures organiz
 
 **Income Statement**
 
-As out dataset is connected to a single database, it will have values of income statement and balance sheet. we need to explicitly define income statement values using below measure. 
 
-I/S Amount = 					
+Preparation of the income statement can be divided into three main components: calculation of amounts, subtotals, and ratios. 
+
+
+The calculation of income statement amounts is straightforward and can be achieved using the following simple measure. It is essential to explicitly define the income statement amount using this measure
+
+
+![image](https://github.com/user-attachments/assets/a238364e-924f-4c66-bbb9-0f4d066435f8)
+
+
+
+Subtotals like gross profits, operating profits, and net profits are determined using the measure below. These subtotals are treated as running totals, achievable with the specified calculation
+
+
+![image](https://github.com/user-attachments/assets/97f84325-eda7-4e7a-ba79-dc5dc8306ebe)
+
+
+
+Finally, ratios are calculated as a percentage of revenue using the following measure
+
+
+![image](https://github.com/user-attachments/assets/293e56ce-cae6-4590-8a25-28aabe7a0b32)
 					
-CALCULATE([SUM Amount],Dim_Headers[Statement] = "Income Statement")
+
+**Challenege No. 1**
 
 
-Subtotals like Gross Profits, operating profits, net profits are calculated using below measure. 
+Now, we have three distinct measures: I/S Amount, I/S Subtotal, and Ratios. To make these measures relevant and useful, we need to combine them. We will create a master measure called the "Income Statement Measure
 
-I/S Subtotal = 				
+
+![image](https://github.com/user-attachments/assets/2763cb65-98a5-41ab-b5f7-8be3603c26d4)
 				
-CALCULATE(				
-    [I/S Amount],				
-    FILTER(				
-        All(				
-            Dim_Headers),Dim_Headers[Sort]<MAX(Dim_Headers[Sort])))				
 
 
+**Challenege No.2**
+Currently, our dataset displays revenues as negative numbers and expenses as positive. To present all values as positive, we will use the absolute function
 
-Ratios can be calculated using below measures
-
-% of Revenue = 							
-							
-VAR Revenue = CALCULATE([I/S Amount],FILTER(ALL(Dim_Headers),Dim_Headers[Category]="Revenue"))							
-							
-Return 							
-DIVIDE([I/S Subtotal],Revenue,0)							
+![image](https://github.com/user-attachments/assets/eb7a1f0a-3373-4258-87ff-4825bd7e5b90)
+		
 
 
+**Chellenge No. 3**
 
-**Challenege**
-
-Now we have three separate measures , I/s Amount, I/S subtotal and Ratios. we need to combine these measures to make it relevant for us. 
-
-We will write a master measure which will be called **Income statement measure**
-
-
-Income Statement = 						
-SWITCH(TRUE(),						
-SELECTEDVALUE( Dim_Headers[MeasureName])="Subtotal",[I/S Subtotal],						
-SELECTEDVALUE( Dim_Headers[MeasureName])="Per_Of_Revenue",[% of Revenue],						
-    [I/S Amount]						
-)						
-
-
-
-**Another challenge**
-Now our dataset show revenues as negative numbers and expenses as positive. we need to show all numbers in positive. 
-
-we will use absulte function to show all values positive. 
-
-I/S Amount = 						
-						
-CALCULATE(ABS([SUM Amount]),Dim_Headers[Statement] = "Income Statement")		
-
-**Final Step- Creating charts**
-
-To show **water fall charts** for revenues and expenses , we need to flip the sign for all income statement amounts . this can be achieved using below measure. 
-
+To display waterfall charts for revenues and expenses, we need to flip the sign of all income statement amounts. This can be achieved using the following measure
 				
 	SumAmount- WaterFall Chart = [SUM Amount] * -1			
 				
@@ -155,33 +102,86 @@ please note that above measure has no other use except using in water fall chart
 
 **Gross profit margin** can be calculated using below measure:
 
-Gross Profit Ratio = 						
-						
-VAR Gross_profit = CALCULATE([I/S Subtotal],Dim_Headers[Category]="Gross Profit")						
-VAR Revenue = CALCULATE([I/S Amount],Dim_Headers[Category]="Revenue")						
-						
-Return 						
-DIVIDE(Gross_profit,Revenue,0)				
 
+![image](https://github.com/user-attachments/assets/d390589d-69ac-410e-af6f-db78cd9e7e07)
+		
 
 **Report Refresh Date**
-Query has already been calculated in SQL for report refresh date , now we just need to remove all duplicates from the column and paste date in the card visuals. 
+The query for the report refresh date has already been calculated in SQL. Now, we simply need to remove all duplicates from the column and display the date in the card visuals
 
-
-
-#Below is the complete income statement 
+# Below is the complete income statement 
 
 
 ![Income Statement](https://github.com/user-attachments/assets/4b1b69e8-7fc4-4fb0-809e-e605decd4e8e)
 
 
+# Balance Sheet
+
+The balance sheet presents similar challenges as the income statement. The final measure for the balance sheet is shown below
+
+
+![image](https://github.com/user-attachments/assets/4229ea23-5a38-467f-83f0-2a541f2149c0)
+
+
+# Final Balance sheet would be:
+
+![Balance Sheet](https://github.com/user-attachments/assets/c0c614b0-ff62-4c3c-8fe6-1f9695570f03)
+
+
+
+# Cash Flowe statement 
+
+Since cash flow calculations differ from those of the income statement and balance sheet, we need to explicitly write a measure for almost each line item. 
+
+We will use the SELECTEDVALUE measure with the SWITCH TRUE function to obtain all relevant values
+
+
+![image](https://github.com/user-attachments/assets/07749b16-a1ab-4691-ac54-2e1d4b5553c8)
+
+
+# Final Cash flow statement would be:
+
+![Cash Flow Statement](https://github.com/user-attachments/assets/ae0b51e1-507f-4bfe-822a-74dba400fae7)
 
 
 
 
+# Convert to Monthly Model 
+
+Currently, our reports are displayed on a yearly basis. We can easily switch the model to a monthly basis by changing the column values from years to months, resulting in the following outcomes
 
 
+![Detailed Income Statement](https://github.com/user-attachments/assets/710e6b78-cd62-4df3-bba6-6dfd7cac920f)
 
+
+# Ensure Report Accuracy 
+
+We can apply the following checks to ensure the accuracy of all three financial statements:
+
+
+**Income statements**
+
+![image](https://github.com/user-attachments/assets/4ba1b008-d9fe-4c10-bc54-584f7bedb5af)
+
+
+**Balance sheet**
+
+
+I explicitly defined a tolerance level because our balance sheet was not balancing by 0.34, resulting in an imbalance
+
+![image](https://github.com/user-attachments/assets/cdb698ea-bd5c-4829-bd61-09b6a1766336)
+
+
+**Cash Flow Statement**
+
+![image](https://github.com/user-attachments/assets/7e584642-9ead-4c5a-870a-f11303a76b73)
+
+
+# Whole idea behind installing checks
+
+Checks were implemented for all three statements to ensure the measures match our staging fact table. If they do not match, it indicates an issue in our report
+
+![image](https://github.com/user-attachments/assets/a7c1c91c-a2ab-4634-b42d-6637738f107e)
 
 
 
