@@ -184,6 +184,15 @@ Checks were implemented for all three statements to ensure the measures match ou
 ![image](https://github.com/user-attachments/assets/a7c1c91c-a2ab-4634-b42d-6637738f107e)
 
 
+# Contact
+
+For any questions or further information, please contact:
+
+https://www.linkedin.com/in/jamil-ur-rehman-acca/
+
+Jamil.akhunzada@gmail.com
+
++971566353172
 
 
 
